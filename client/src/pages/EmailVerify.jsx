@@ -1,10 +1,14 @@
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
-
+import{AppContent} from '../context/AppContent'
+import  axios  from "axios";
+import { toast } from "react-toastify";
 const EmailVerify = () => {
-  const inputRefs = useRef([]);
-  const navigate = useNavigate();
+  axios.defaults.withCredentials=true;
+const {backendUrl,isLoggedin,UserData,getUserData} =useContext(AppContent)
+ const navigate=useNavigate()
+const inputRefs = useRef([]);
 
   const handleInput = (e, index) => {
     const value = e.target.value;
@@ -52,6 +56,31 @@ const EmailVerify = () => {
       alert("Please enter a valid 6-digit OTP");
     }
   };
+const onSubmitHandler =async(e)=>{
+  try {
+    e.preventDefault();
+    const otpArray=inputRefs.current.map(e=> e.value)
+    const otp = otpArray.join('')
+
+    const{data}=await axios.post(backendUrl + '/api/auth/verify-account',{otp})
+    if(data.success){
+      toast.success(data.message)
+      // Wait for getUserData to complete, then navigate
+      await getUserData()
+      navigate('/')
+    }
+else{
+  toast.error(data.message)
+}
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Something went wrong")
+  }
+}
+
+useEffect(()=>{
+  console.log('UserData:', UserData); // Debug log
+  isLoggedin && UserData && UserData.isAccountVerified && navigate('/')
+},[isLoggedin,UserData])
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
@@ -62,7 +91,8 @@ const EmailVerify = () => {
         alt="Logo"
       />
       <form
-        onSubmit={handleSubmit}
+        onSubmit={onSubmitHandler}
+      
         className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm"
       >
         <h1 className="text-white text-2xl font-semibold text-center mb-4">
