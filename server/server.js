@@ -14,7 +14,7 @@ connectDB();
 // Updated CORS for production
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://login-page-jet-eta.vercel.app/', // Replace with your actual Vercel domain
+  'https://login-page-jet-eta.vercel.app', // Replace with your actual Vercel domain
   process.env.FRONTEND_URL
 ];
 
